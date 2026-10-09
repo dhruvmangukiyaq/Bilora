@@ -2,11 +2,11 @@ import { createPortal } from 'react-dom'
 import { useLayoutEffect, useRef, useState } from 'react'
 import InvoicePage, { A4, ROWS_PER_PAGE } from './InvoicePage.jsx'
 
-/** How many A4 sheets this invoice needs. */
+/** How many sheets this invoice needs. */
 export const pageCount = (itemCount) => Math.max(1, Math.ceil((itemCount || 0) / ROWS_PER_PAGE))
 
 /**
- * On-screen A4 preview — the same document component, scaled with a CSS
+ * On-screen preview — the same document component, scaled with a CSS
  * transform to fit the available width. Nothing here is used for export.
  */
 export function ScaledPreview({ business, invoice, totals, pages = 1 }) {
@@ -69,7 +69,7 @@ export function ScaledPreview({ business, invoice, totals, pages = 1 }) {
 }
 
 /**
- * The real export/print source: full-size A4 pages parked behind the app shell
+ * The real export/print source: full-size pages parked behind the app shell
  * at viewport 0,0. html2canvas rasterises these; the browser prints them.
  */
 export function ExportStage({ business, invoice, totals, pages = 1, stageRef }) {

@@ -1,5 +1,7 @@
 /* ------------------------------------------------------------------
-   The printed tax invoice — A4 794 x 1123 px (= 210 x 297 mm @96dpi).
+   The printed tax invoice — laid out on A4 geometry (794 x 1123 px =
+   210 x 297 mm @96dpi) and printed on A5 paper (see index.css @media
+   print + lib/pdf.js), which is the same paper ratio.
 
    Every block is absolutely positioned (no flex gap, no CSS grid) so the
    html2canvas raster used for the PDF matches the on-screen preview

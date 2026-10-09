@@ -1,7 +1,7 @@
 # Bilora — GST Invoice Builder
 
-A GST tax-invoice / billing web app that reproduces a printed Indian red-themed A4 tax
-invoice, pixel for pixel. Fill a form on the left, watch the live A4 preview on the right,
+A GST tax-invoice / billing web app that reproduces a printed Indian red-themed tax
+invoice, pixel for pixel. Fill a form on the left, watch the live preview on the right,
 then download a **colour PDF** that matches the preview exactly.
 
 Built with **React 19 + Vite 6 + Tailwind CSS 4**, exporting via **html2canvas + jsPDF**.
@@ -43,7 +43,7 @@ npm run preview    # serve the production build
   *Business settings → Restore sample*.
 
 ### Invoice studio
-- **Live A4 preview** that matches the PDF (scaled to fit, "1 page · preview matches the PDF").
+- **Live preview** that matches the PDF (scaled to fit, "1 page · preview matches the PDF").
 - **Printed layout** (top → bottom): red border with thin rules, Gujarati invocation lines and
   WhatsApp number, business name, pink address strip, a **3-row info grid** —
   `GSTIN · State · Invoice No.` / `PAN · Code · Invoice Date` / with **`P. Ch. No.` directly
@@ -78,9 +78,11 @@ npm run preview    # serve the production build
   warning showing a valid example.
 
 ### Export
-- **Download PDF** → `Invoice-7-PurvirCreation.pdf` — colour, A4 (595 × 842 pt),
+- **Download PDF** → `Invoice-7-PurvirCreation.pdf` — colour, **A5 (148 × 210 mm)**,
   rendered at 288 DPI (2382 × 3369 px), one PDF page per invoice page.
-- **Print** — uses the browser print dialog with A4 page rules (`@page { size: A4; margin: 0 }`).
+- **Print** — uses the browser print dialog with A5 page rules (`@page { size: A5; margin: 0 }`);
+  the sheet is laid out at A4 geometry (794 × 1123 px) and scaled to `0.7045` so the exact
+  same design prints on A5 paper.
 - **WhatsApp share** — opens `wa.me/<number>` with a pre-filled message containing the
   invoice no., buyer, date, grand total and amount in words.
 
@@ -129,10 +131,10 @@ src/
     auth.js        accounts, password hashing, session, per-user data keys, setup gate
     storage.js     per-user localStorage API, seed data, JSON import/export, signature downscale
     states.js      state name → GST code map
-    pdf.js         html2canvas → jsPDF export (colour, A4, multipage)
+    pdf.js         html2canvas → jsPDF export (colour, A5, multipage)
   store/StoreContext.jsx   app state + per-user persistence
   components/
-    invoice/InvoicePage.jsx   A4 document (absolute layout, theme vars)
+    invoice/InvoicePage.jsx   invoice document (absolute layout, theme vars)
     invoice/invoice.css       all invoice styling — absolute positioning only
     invoice/preview.jsx       ScaledPreview + ExportStage (offscreen export source)
     ui.jsx                    buttons, fields, sections, toasts
@@ -149,14 +151,16 @@ src/
 
 ## Implementation notes
 
-- **A4 is 794 × 1123 px.** `ROWS_PER_PAGE = 17`, row height 33 px; each page renders the
+- **The sheet is 794 × 1123 px (A4 geometry) and prints on A5** (PDF page + `@page` are
+  148 × 210 mm), scaled `0.7045` — A4 and A5 share the √2 paper ratio, so nothing distorts.
+  `ROWS_PER_PAGE = 17`, row height 33 px; each page renders the
   full invoice with its slice of rows, so totals and footer repeat on every page.
 - Invoice CSS uses **only absolute positioning and block flow** — no CSS grid and no flex
   `gap` — because html2canvas 1.4.1 does not support them.
 - The PDF source is an off-screen `.inv-stage` portal-rendered at the viewport origin
   behind the opaque app shell; `ignoreElements` prunes the app shell from the clone.
 - Pass `windowWidth` / `windowHeight` but **not** `width` / `height` to html2canvas —
-  explicit `width`/`height` override element bounds and break the A4 fill.
+  explicit `width`/`height` override element bounds and break the sheet fill.
 - Works on mobile (stacked form/preview with a toggle) and desktop (side by side).
 
 ## Auth & onboarding notes

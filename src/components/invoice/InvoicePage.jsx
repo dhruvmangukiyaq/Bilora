@@ -1,7 +1,7 @@
 import './invoice.css'
 import { amountInWords, fmt, fmtAmt, fmtDec, fmtQty, lineAmount, num } from '../../lib/calc'
 
-/* A4 at 96dpi */
+/* sheet geometry at 96dpi — laid out on A4 px, printed on A5 */
 export const A4 = { w: 794, h: 1123 }
 export const ROW_H = 33
 export const ROWS_PER_PAGE = 17

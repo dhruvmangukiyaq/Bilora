@@ -542,7 +542,7 @@ export default function Studio({ editId, onOpenHistory }) {
           >
             <div className="mx-auto max-w-[900px] mb-3 flex items-center justify-between text-[11.5px] text-mute">
               <span className="font-semibold uppercase tracking-wider">
-                A4 · 210 × 297 mm · colour
+                A5 · 148 × 210 mm · colour
               </span>
               <span className="tnum">
                 {pages} page{pages > 1 ? 's' : ''} · preview matches the PDF
