@@ -95,7 +95,10 @@ npm run preview    # serve the production build
   - invoice header: Gujarati invocation lines (editable), WhatsApp / phone
   - bank details: bank name, a/c no., IFSC
   - default tax rates (SGST / CGST)
-  - **signature / stamp upload** (blank signing space above “For, {BUSINESS}”)
+  - **signature / stamp upload** (blank signing space above “For, {BUSINESS}”) — the photo’s
+    **paper background is cut away automatically** (local paper-tone estimate → alpha ramp),
+    so only the ink prints, on every page, in the PDF and in the print-out. Old uploads are
+    re-cut once on load; already-cut images are left alone, so it never loops.
   - **theme colour** picker — live-updates the whole invoice (border, labels, strips,
     with auto-derived tints), plus **Reset**
   - **Handwriting** toggle — renders values in a hand-written (Caveat) font, or **Clean**
@@ -129,7 +132,7 @@ src/
     calc.js        formatting, Indian number-to-words, computeTotals, date masking
     validation.js  required-field + GSTIN checks
     auth.js        accounts, password hashing, session, per-user data keys, setup gate
-    storage.js     per-user localStorage API, seed data, JSON import/export, signature downscale
+    storage.js     per-user localStorage API, seed data, JSON import/export, signature downscale + paper cut-out
     states.js      state name → GST code map
     pdf.js         html2canvas → jsPDF export (colour, A5, multipage)
   store/StoreContext.jsx   app state + per-user persistence

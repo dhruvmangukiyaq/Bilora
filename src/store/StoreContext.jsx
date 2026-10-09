@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
   blankInvoice,
+  cutImageBackground,
   emptyBusiness,
   emptyState,
   loadState,
@@ -21,6 +22,26 @@ export function StoreProvider({ user, children }) {
   useEffect(() => {
     saveState(state, key)
   }, [state, key])
+
+  /* A signature uploaded before the paper-cut existed still carries its grey
+     background — cut it away once, on load. Idempotent: an image that is
+     already a cut-out is detected and left exactly as it is, so this settles
+     after one pass. */
+  const signature = state.business?.signature
+  useEffect(() => {
+    if (typeof signature !== 'string' || !signature.startsWith('data:image')) return undefined
+    let alive = true
+    cutImageBackground(signature)
+      .then(({ url, cut }) => {
+        if (alive && cut) setState((s) => ({ ...s, business: { ...s.business, signature: url } }))
+      })
+      .catch(() => {
+        /* unreadable image — keep it as it is */
+      })
+    return () => {
+      alive = false
+    }
+  }, [signature])
 
   const patch = useCallback((fn) => setState((s) => ({ ...s, ...fn(s) })), [])
 

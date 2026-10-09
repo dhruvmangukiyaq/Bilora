@@ -40,9 +40,9 @@ export default function Settings({ setupMode = false, onSetupDone }) {
   const onSignature = async (file) => {
     if (!file) return
     try {
-      const dataUrl = await readImageScaled(file, 520)
-      set({ signature: dataUrl })
-      flash('Signature / stamp added')
+      const { url, cut } = await readImageScaled(file, 520)
+      set({ signature: url })
+      flash(cut ? 'Added · paper background removed' : 'Signature / stamp added')
     } catch {
       flash('Could not read that image', 'err')
     }
@@ -262,6 +262,11 @@ export default function Settings({ setupMode = false, onSetupDone }) {
                 </Btn>
               ) : null}
             </div>
+            <p className="mt-2 text-[11.5px] leading-snug text-mute">
+              {business.signature
+                ? 'Paper background is cut away — only the ink prints on the bill.'
+                : 'Upload a photo of the signature or stamp; the paper background is cut away automatically.'}
+            </p>
           </div>
 
           {/* theme */}
