@@ -134,19 +134,6 @@ export default function Studio({ editId, onOpenHistory }) {
 
   const print = () => window.print()
 
-  const share = () => {
-    const digits = String(inv.buyer.phone || business.phone || '').replace(/\D/g, '')
-    const msg = [
-      `*Invoice ${inv.no}* — ${business.name}`,
-      `M/s. ${inv.buyer.name || '—'}`,
-      `Date: ${inv.date}`,
-      `Grand Total: Rs. ${fmtAmt(totals.grand)}`,
-      amountInWords(totals.grand),
-    ].join('\n')
-    const url = `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`
-    window.open(url, '_blank', 'noopener,noreferrer')
-  }
-
   /* ------------------------- render ------------------------- */
 
   return (
@@ -200,9 +187,6 @@ export default function Studio({ editId, onOpenHistory }) {
               </Btn>
               <Btn variant="outline" icon="printer" onClick={print}>
                 <span className="hidden sm:inline">Print</span>
-              </Btn>
-              <Btn variant="outline" icon="whatsapp" onClick={share} className="hidden sm:inline-flex">
-                WhatsApp
               </Btn>
               <Btn variant="solid" icon="download" onClick={downloadPdf} disabled={busy === 'pdf'}>
                 {busy === 'pdf' ? 'Building…' : 'Download PDF'}
@@ -356,7 +340,7 @@ export default function Studio({ editId, onOpenHistory }) {
                   <option value="Andhra Pradesh" />
                 </datalist>
 
-                <Field label="WhatsApp number" hint="for the share button">
+                <Field label="WhatsApp number" hint="saved with the customer">
                   <input
                     className={inputCls(false)}
                     value={inv.buyer.phone}

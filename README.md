@@ -83,8 +83,6 @@ npm run preview    # serve the production build
 - **Print** — uses the browser print dialog with A5 page rules (`@page { size: A5; margin: 0 }`);
   the sheet is laid out at A4 geometry (794 × 1123 px) and scaled to `0.7045` so the exact
   same design prints on A5 paper.
-- **WhatsApp share** — opens `wa.me/<number>` with a pre-filled message containing the
-  invoice no., buyer, date, grand total and amount in words.
 
 ### Data
 - **Invoice history** — search by number / buyer / item, plus **edit**, **duplicate**
@@ -144,7 +142,7 @@ src/
     CustomerPicker.jsx        searchable saved-customer dropdown
   pages/
     Auth.jsx        sign in / create account screen
-    Studio.jsx      form rail + live preview + toolbar (Save / Print / WhatsApp / PDF)
+    Studio.jsx      form rail + live preview + toolbar (Save / Print / PDF)
     History.jsx     search, edit, duplicate, delete
     Customers.jsx   customer master CRUD
     Settings.jsx    business defaults, theme, signature, data tools
