@@ -119,7 +119,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
                 if (nameErr) setNameErr(false)
                 set({ name: e.target.value })
               }}
-              placeholder="Name as printed on your invoice"
             />
           </Field>
           <Field label="Address" className="sm:col-span-2">
@@ -128,7 +127,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
               className="w-full px-2.5 py-2 rounded-[4px] border border-line bg-white text-[13px] text-ink focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 resize-y"
               value={business.address}
               onChange={(e) => set({ address: e.target.value })}
-              placeholder="Plot, street, area, city"
             />
           </Field>
           <Field
@@ -141,7 +139,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
               value={business.gstin}
               maxLength={15}
               onChange={(e) => set({ gstin: e.target.value.toUpperCase() })}
-              placeholder="24ANWPM9595R1ZF"
             />
           </Field>
           <Field
@@ -154,7 +151,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
               value={business.pan}
               maxLength={10}
               onChange={(e) => set({ pan: e.target.value.toUpperCase() })}
-              placeholder="ANWPM9595R"
             />
           </Field>
           <Field label="State">
@@ -166,7 +162,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
                 const s = e.target.value
                 set({ state: s, stateCode: codeForState(s) || business.stateCode })
               }}
-              placeholder="Gujarat"
             />
           </Field>
           <Field label="State code">
@@ -175,7 +170,6 @@ export default function Settings({ setupMode = false, onSetupDone }) {
               value={business.stateCode}
               inputMode="numeric"
               onChange={(e) => set({ stateCode: e.target.value.replace(/\D/g, '').slice(0, 2) })}
-              placeholder="24"
             />
           </Field>
           <datalist id="settings-states">
@@ -204,7 +198,7 @@ export default function Settings({ setupMode = false, onSetupDone }) {
               <input className={inputCls(false)} value={business.headerCenter} onChange={(e) => set({ headerCenter: e.target.value })} />
             </Field>
             <Field label="WhatsApp / phone" hint="top-right">
-              <input className={inputCls(false)} value={business.phone} onChange={(e) => set({ phone: e.target.value })} placeholder="98254 06884" />
+              <input className={inputCls(false)} value={business.phone} onChange={(e) => set({ phone: e.target.value })} />
             </Field>
           </div>
         </Section>
@@ -212,14 +206,14 @@ export default function Settings({ setupMode = false, onSetupDone }) {
         <Section title="Bank details">
           <div className="space-y-3">
             <Field label="Bank name">
-              <input className={inputCls(false)} value={business.bankName} onChange={(e) => set({ bankName: e.target.value })} placeholder="Punjab National Bank" />
+              <input className={inputCls(false)} value={business.bankName} onChange={(e) => set({ bankName: e.target.value })} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="A/c. No.">
-                <input className={inputCls(false)} value={business.acNo} onChange={(e) => set({ acNo: e.target.value })} placeholder="3749002100103811" />
+                <input className={inputCls(false)} value={business.acNo} onChange={(e) => set({ acNo: e.target.value })} />
               </Field>
               <Field label="IFSC code">
-                <input className={`${inputCls(false)} uppercase`} value={business.ifsc} onChange={(e) => set({ ifsc: e.target.value.toUpperCase() })} placeholder="PUNB0374900" />
+                <input className={`${inputCls(false)} uppercase`} value={business.ifsc} onChange={(e) => set({ ifsc: e.target.value.toUpperCase() })} />
               </Field>
             </div>
             <div className="grid grid-cols-2 gap-3">

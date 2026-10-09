@@ -4,10 +4,11 @@
 export const uid = () =>
   `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 
-/** Blank business — what a brand-new account starts with (no sample data). */
+/** Blank business — what a brand-new account starts with (no sample data).
+    Nothing is pre-filled: the user types their own header lines, GSTIN, bank… */
 export const emptyBusiness = () => ({
-  headerLeft: '॥ જય શ્રી સ્વામિનારાયણ ॥',
-  headerCenter: '॥ શ્રી ગણેશાય નમઃ ॥',
+  headerLeft: '',
+  headerCenter: '',
   phone: '',
   name: '',
   address: '',

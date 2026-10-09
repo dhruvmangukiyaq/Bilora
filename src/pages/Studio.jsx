@@ -226,7 +226,6 @@ export default function Studio({ editId, onOpenHistory }) {
                     value={inv.no}
                     inputMode="numeric"
                     onChange={(e) => patch({ no: e.target.value })}
-                    placeholder="7"
                   />
                 </Field>
                 <Field label="Invoice date" hint="DD/MM/YY" error={submitted && errors.date}>
@@ -234,7 +233,6 @@ export default function Studio({ editId, onOpenHistory }) {
                     className={inputCls(submitted && errors.date)}
                     value={inv.date}
                     onChange={(e) => patch({ date: maskDate(e.target.value) })}
-                    placeholder="01/09/25"
                     inputMode="numeric"
                   />
                 </Field>
@@ -311,7 +309,6 @@ export default function Studio({ editId, onOpenHistory }) {
                       className={`${inputCls((submitted || gstinBad) && errors.buyerGstin)} pr-8 uppercase`}
                       value={inv.buyer.gstin}
                       onChange={(e) => patchBuyer({ gstin: e.target.value.toUpperCase() })}
-                      placeholder="24AAAAA0000A1Z5"
                       maxLength={15}
                     />
                     {inv.buyer.gstin ? (
@@ -333,7 +330,6 @@ export default function Studio({ editId, onOpenHistory }) {
                       list="indian-states"
                       value={inv.buyer.state}
                       onChange={(e) => setBuyerState(e.target.value)}
-                      placeholder="Gujarat"
                     />
                   </Field>
                   <Field label="Code">
@@ -341,7 +337,6 @@ export default function Studio({ editId, onOpenHistory }) {
                       className={inputCls(false)}
                       value={inv.buyer.code}
                       onChange={(e) => patchBuyer({ code: e.target.value.replace(/\D/g, '').slice(0, 2) })}
-                      placeholder="24"
                       inputMode="numeric"
                     />
                   </Field>
@@ -365,7 +360,6 @@ export default function Studio({ editId, onOpenHistory }) {
                     className={inputCls(false)}
                     value={inv.buyer.phone}
                     onChange={(e) => patchBuyer({ phone: e.target.value })}
-                    placeholder="98765 43210"
                     inputMode="tel"
                   />
                 </Field>

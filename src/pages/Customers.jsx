@@ -147,7 +147,6 @@ export default function Customers() {
                   className={inputCls(tried && nameError)}
                   value={draft.name}
                   onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                  placeholder="Purvir Creation"
                 />
               </Field>
               <Field label="Address">
@@ -156,7 +155,6 @@ export default function Customers() {
                   className="w-full px-2.5 py-2 rounded-[4px] border border-line bg-white text-[13px] text-ink placeholder:text-mute/60 focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/15 resize-y"
                   value={draft.address}
                   onChange={(e) => setDraft({ ...draft, address: e.target.value })}
-                  placeholder="Street, city, state"
                 />
               </Field>
               <Field
@@ -169,7 +167,6 @@ export default function Customers() {
                   value={draft.gstin}
                   maxLength={15}
                   onChange={(e) => setDraft({ ...draft, gstin: e.target.value.toUpperCase() })}
-                  placeholder="24AAAAA0000A1Z5"
                 />
               </Field>
               <div className="grid grid-cols-2 gap-3">
@@ -182,7 +179,6 @@ export default function Customers() {
                       const state = e.target.value
                       setDraft({ ...draft, state, code: codeForState(state) || draft.code })
                     }}
-                    placeholder="Gujarat"
                   />
                 </Field>
                 <Field label="Code">
@@ -191,7 +187,6 @@ export default function Customers() {
                     value={draft.code}
                     inputMode="numeric"
                     onChange={(e) => setDraft({ ...draft, code: e.target.value.replace(/\D/g, '').slice(0, 2) })}
-                    placeholder="24"
                   />
                 </Field>
               </div>
@@ -214,7 +209,6 @@ export default function Customers() {
                   value={draft.phone}
                   inputMode="tel"
                   onChange={(e) => setDraft({ ...draft, phone: e.target.value })}
-                  placeholder="98765 43210"
                 />
               </Field>
 
