@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/StoreContext.jsx'
 import { Btn, Field, Icon, Section, Toast, inputCls } from '../components/ui.jsx'
 import CustomerPicker from '../components/CustomerPicker.jsx'
+import DatePicker from '../components/DatePicker.jsx'
 import { ExportStage, ScaledPreview, pageCount } from '../components/invoice/preview.jsx'
 import {
   amountInWords,
@@ -10,7 +11,6 @@ import {
   fmtAmt,
   fmtDec,
   lineAmount,
-  maskDate,
 } from '../lib/calc.js'
 import { blankItem } from '../lib/storage.js'
 import { GSTIN_MSG, isValidGstin, validateInvoice } from '../lib/validation.js'
@@ -214,11 +214,10 @@ export default function Studio({ editId, onOpenHistory }) {
                   />
                 </Field>
                 <Field label="Invoice date" hint="DD/MM/YY" error={submitted && errors.date}>
-                  <input
-                    className={inputCls(submitted && errors.date)}
+                  <DatePicker
                     value={inv.date}
-                    onChange={(e) => patch({ date: maskDate(e.target.value) })}
-                    inputMode="numeric"
+                    onChange={(d) => patch({ date: d })}
+                    invalid={submitted && errors.date}
                   />
                 </Field>
                 <Field label="P. Ch. No." hint="purchase challan" className="col-span-2">

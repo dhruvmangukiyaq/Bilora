@@ -53,7 +53,9 @@ npm run preview    # serve the production build
   theme red**; `Invoice No.` / `Invoice Date` keep the regular navy values. There is **no
   terms block** — the bottom-left cell is left blank.
 - **Form ⇄ preview toggle** on mobile; side-by-side on desktop.
-- **Auto-incrementing invoice number**, date defaults to today (`DD/MM/YY`).
+- **Auto-incrementing invoice number**; the date defaults to today (`DD/MM/YY`) and can be
+  typed or picked from a **calendar** — month grid with prev/next and *Today*, closing on
+  Escape or an outside click, writing straight back as `DD/MM/YY`.
 - **Customer picker** — searchable dropdown over the saved customer master; picking one
   fills GSTIN, state and code automatically.
 - **Line items** with `Amount = round(Pics × Rate)`; `Pics` accepts decimals (e.g. `867.58`).
@@ -138,7 +140,8 @@ src/
     invoice/InvoicePage.jsx   invoice document (absolute layout, theme vars)
     invoice/invoice.css       all invoice styling — absolute positioning only
     invoice/preview.jsx       ScaledPreview + ExportStage (offscreen export source)
-    ui.jsx                    buttons, fields, sections, toasts
+    ui.jsx                    buttons, fields, sections, toasts, icons
+    DatePicker.jsx            invoice-date calendar popover (DD/MM/YY)
     CustomerPicker.jsx        searchable saved-customer dropdown
   pages/
     Auth.jsx        sign in / create account screen
