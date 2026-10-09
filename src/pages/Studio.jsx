@@ -7,6 +7,7 @@ import {
   amountInWords,
   computeTotals,
   fmt,
+  fmtAmt,
   fmtDec,
   lineAmount,
   maskDate,
@@ -139,7 +140,7 @@ export default function Studio({ editId, onOpenHistory }) {
       `*Invoice ${inv.no}* — ${business.name}`,
       `M/s. ${inv.buyer.name || '—'}`,
       `Date: ${inv.date}`,
-      `Grand Total: Rs. ${fmt(totals.grand)}`,
+      `Grand Total: Rs. ${fmtAmt(totals.grand)}`,
       amountInWords(totals.grand),
     ].join('\n')
     const url = `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`
@@ -168,7 +169,7 @@ export default function Studio({ editId, onOpenHistory }) {
                 )}
               </h1>
               <p className="text-[12px] text-mute truncate">
-                {inv.buyer.name || 'No buyer yet'} · Rs. {fmt(totals.grand)} ·{' '}
+                {inv.buyer.name || 'No buyer yet'} · Rs. {fmtAmt(totals.grand)} ·{' '}
                 <span className="whitespace-nowrap">
                   {pages} page{pages > 1 ? 's' : ''}
                 </span>
@@ -515,15 +516,15 @@ export default function Studio({ editId, onOpenHistory }) {
                 <Row label="Total" value={`Rs. ${fmt(totals.total)}`} strong />
                 <Row
                   label={`SGST @ ${fmtDec(totals.sgstRate)}%`}
-                  value={`Rs. ${fmt(totals.sgst)}`}
+                  value={`Rs. ${fmtAmt(totals.sgst)}`}
                 />
                 <Row
                   label={`CGST @ ${fmtDec(totals.cgstRate)}%`}
-                  value={`Rs. ${fmt(totals.cgst)}`}
+                  value={`Rs. ${fmtAmt(totals.cgst)}`}
                 />
                 <div className="mt-2 flex items-baseline justify-between gap-3 bg-blush border border-brand/25 px-3 py-2.5">
                   <dt className="text-[13px] font-bold text-brand">Grand Total</dt>
-                  <dd className="text-[17px] font-extrabold text-ink tnum">Rs. {fmt(totals.grand)}</dd>
+                  <dd className="text-[17px] font-extrabold text-ink tnum">Rs. {fmtAmt(totals.grand)}</dd>
                 </div>
               </dl>
               <p className="mt-3 text-[12px] leading-snug text-mute">

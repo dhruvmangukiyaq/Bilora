@@ -64,13 +64,15 @@ npm run preview    # serve the production build
   2. `Discount` is a **percentage** (e.g. `5` → 5 % cut from the gross, clamped to 0–100 %),
      shown as `Discount @ 5 %` on the invoice
   3. `Total = Gross − (Discount % × Gross)`
-  4. `SGST` + `CGST` (defaults 2.5 % each) are charged **on that discounted Total**, each
-     rounded to the rupee
+  4. `SGST` + `CGST` (defaults 2.5 % each) are charged **on that discounted Total** and kept
+     to **2 decimals — paise are printed** (e.g. `SGST @ 2.5 % … 1,952.50`)
   5. `Grand Total = Total + SGST + CGST`
 
   **IGST is not used** — SGST + CGST always apply, whatever the buyer state.
-- **Amount in words** in Indian numbering — *Eighty One Thousand Nine Hundred Eighty Six
-  Rupees Only*.
+  Amounts print with paise only when there are any (`1,952.50`), otherwise as whole
+  rupees (`81,986`).
+- **Amount in words** in Indian numbering, paise included — *Eighty One Thousand Nine
+  Hundred Eighty Six Rupees Only*, or *… Rupees and Fifty Paise Only*.
 - **Validation** with inline errors — required fields, and GSTIN format
   (`^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$`) with a red border, `invalid` tag and a
   warning showing a valid example.

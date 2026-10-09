@@ -2,11 +2,18 @@
    Calculation + formatting helpers for the GST invoice.
    ------------------------------------------------------------------ */
 
-/** Round to the nearest whole rupee (the invoice never shows paise). */
+/** Round to the nearest whole rupee. */
 export const round0 = (n) => {
   const v = Number(n)
   if (!Number.isFinite(v)) return 0
   return Math.round(v)
+}
+
+/** Round to 2 decimals (paise), guarding float noise: 12.345 -> 12.35 */
+export const round2 = (n) => {
+  const v = Number(n)
+  if (!Number.isFinite(v)) return 0
+  return Math.round((v + Number.EPSILON) * 100) / 100
 }
 
 /** Parse anything typed into a numeric field into a safe number. */
@@ -23,6 +30,16 @@ export const fmt = (n) =>
 /** 867.58 -> "867.58" with Indian grouping when needed */
 export const fmtDec = (n) =>
   new Intl.NumberFormat('en-IN', { maximumFractionDigits: 2 }).format(num(n))
+
+/** Money with paise only when they exist: 81986 -> "81,986", 1952.5 -> "1,952.50" */
+export const fmtAmt = (n) => {
+  const v = num(n)
+  if (Number.isInteger(v)) return fmt(v)
+  return new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(v)
+}
 
 /** Quantity keeps decimals: 867.58 */
 export const fmtQty = (n) => {
@@ -68,11 +85,15 @@ export const inWords = (amount) => {
   return parts.join(' ')
 }
 
-/** Grand total in words, Indian format, e.g. "... Rupees Only" */
+/** Grand total in words, Indian format — "... Rupees Only", and paise when
+    there are any: "... Rupees and Fifty Paise Only". */
 export const amountInWords = (amount) => {
-  const words = inWords(amount)
-  const rupeeWord = round0(Math.abs(num(amount))) === 1 ? 'Rupee' : 'Rupees'
-  return `${words} ${rupeeWord} Only`
+  const v = round2(Math.abs(num(amount)))
+  const rupees = Math.floor(v)
+  const paise = Math.round((v - rupees) * 100)
+  let out = `${inWords(rupees)} ${rupees === 1 ? 'Rupee' : 'Rupees'}`
+  if (paise > 0) out += ` and ${inWords(paise)} Paise`
+  return `${out} Only`
 }
 
 /* ---------------- invoice maths ---------------- */
@@ -85,8 +106,9 @@ export const lineAmount = (pics, rate) => round0(num(pics) * num(rate))
  * discount is a PERCENTAGE (5 -> 5% of the gross is cut off).
  * Gross = sum(line amounts)
  * Total = Gross - (discount % x Gross)
- * SGST + CGST are charged on Total (IGST is not used in this app).
- * Tax is rounded to the nearest rupee; Grand Total = Total + SGST + CGST.
+ * SGST + CGST are charged on Total (IGST is not used in this app) and are
+ * kept to 2 decimals, so any paise is printed on the bill.
+ * Grand Total = Total + SGST + CGST.
  */
 export function computeTotals({
   items = [],
@@ -99,10 +121,10 @@ export function computeTotals({
   const disc = Math.min(round0((gross * discountPct) / 100), gross)
   const total = gross - disc
 
-  const sgst = round0((total * num(sgstRate)) / 100)
-  const cgst = round0((total * num(cgstRate)) / 100)
+  const sgst = round2((total * num(sgstRate)) / 100)
+  const cgst = round2((total * num(cgstRate)) / 100)
 
-  const grand = total + sgst + cgst
+  const grand = round2(total + sgst + cgst)
 
   return {
     gross,

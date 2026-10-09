@@ -1,5 +1,5 @@
 import './invoice.css'
-import { amountInWords, fmt, fmtDec, fmtQty, lineAmount, num } from '../../lib/calc'
+import { amountInWords, fmt, fmtAmt, fmtDec, fmtQty, lineAmount, num } from '../../lib/calc'
 
 /* A4 at 96dpi */
 export const A4 = { w: 794, h: 1123 }
@@ -226,11 +226,11 @@ export default function InvoicePage({ business, invoice, totals, pageIndex = 0 }
               0
             )}
             {totRow('Total', fmt(t.total), 1)}
-            {totRow(`SGST @ ${fmtDec(t.sgstRate)} %`, fmt(t.sgst), 2)}
-            {totRow(`CGST @ ${fmtDec(t.cgstRate)} %`, fmt(t.cgst), 3)}
+            {totRow(`SGST @ ${fmtDec(t.sgstRate)} %`, fmtAmt(t.sgst), 2)}
+            {totRow(`CGST @ ${fmtDec(t.cgstRate)} %`, fmtAmt(t.cgst), 3)}
             <div className="tot-grand">
               <span className="lbl">Grand Total</span>
-              <span className="val">{fmt(t.grand)}</span>
+              <span className="val">{fmtAmt(t.grand)}</span>
             </div>
           </div>
         </div>

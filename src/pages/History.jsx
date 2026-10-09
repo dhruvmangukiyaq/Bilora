@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../store/StoreContext.jsx'
 import { Btn, EmptyState, Icon, Toast } from '../components/ui.jsx'
-import { computeTotals, fmt } from '../lib/calc.js'
+import { computeTotals, fmtAmt } from '../lib/calc.js'
 
 export default function History({ onEdit, onNew }) {
   const store = useStore()
@@ -112,7 +112,7 @@ export default function History({ onEdit, onNew }) {
 
               <div className="flex items-center justify-between gap-3 mt-2 md:mt-0 md:contents">
                 <span className="text-[14.5px] font-bold text-ink tnum md:text-right">
-                  Rs. {fmt(total)}
+                  Rs. {fmtAmt(total)}
                 </span>
                 <div className="flex items-center gap-1 md:justify-end">
                   <IconBtn label="Edit" icon="edit" onClick={() => onEdit(inv.id)} />
