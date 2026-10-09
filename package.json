@@ -1,0 +1,24 @@
+{
+  "name": "bilora-gst-invoice",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "GST Tax Invoice / Billing web app with printable A4 layout and colour PDF export",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.1.11",
+    "vite": "^6.3.5"
+  }
+}
