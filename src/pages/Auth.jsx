@@ -112,7 +112,7 @@ export default function AuthScreen({ onSignedIn }) {
                 onChange={(e) => setUsername(e.target.value)}
                 autoComplete="username"
                 spellCheck={false}
-                placeholder="e.g. dhruv"
+                placeholder="Your username"
               />
             </Field>
 
