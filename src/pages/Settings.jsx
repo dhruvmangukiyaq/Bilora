@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { useStore } from '../store/StoreContext.jsx'
 import { Btn, Field, Icon, Section, Toast, inputCls } from '../components/ui.jsx'
+import { isSetUp } from '../lib/auth.js'
 import { GSTIN_MSG, PAN_MSG, isValidGstin, isValidPan } from '../lib/validation.js'
 import { codeForState } from '../lib/states.js'
 import { downloadJSON, readImageScaled, readJSONFile } from '../lib/storage.js'
@@ -9,17 +10,31 @@ import { lighten } from '../components/invoice/InvoicePage.jsx'
 const numIn = (extra = '') =>
   `${inputCls(false)} text-right tnum ${extra}`
 
-export default function Settings() {
+export default function Settings({ setupMode = false, onSetupDone }) {
   const store = useStore()
   const { business, state } = store
   const set = (p) => store.updateBusiness(p)
   const [toast, setToast] = useState(null)
   const [busy, setBusy] = useState(false)
+  const [nameErr, setNameErr] = useState(false)
   const fileRef = useRef(null)
 
   const flash = (msg, tone) => {
     setToast({ msg, tone })
     setTimeout(() => setToast(null), 2600)
+  }
+
+  /* setup screen: only the business name is required to unlock invoicing */
+  const saveSetup = () => {
+    if (!isSetUp(business)) {
+      setNameErr(true)
+      flash('Business name is required', 'err')
+      const el = document.getElementById('business-name')
+      if (el) el.focus()
+      return
+    }
+    setNameErr(false)
+    onSetupDone?.()
   }
 
   const onSignature = async (file) => {
@@ -53,9 +68,13 @@ export default function Settings() {
     <div className="mx-auto w-full max-w-[980px] px-3 sm:px-5 py-5 sm:py-7 space-y-4">
       <div className="flex items-end justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-[19px] font-bold tracking-[-0.01em] text-ink">Business settings</h1>
+          <h1 className="text-[19px] font-bold tracking-[-0.01em] text-ink">
+            {setupMode ? 'Set up your business' : 'Business settings'}
+          </h1>
           <p className="text-[13px] text-mute">
-            Set once — every new invoice starts from these defaults. Changes save automatically.
+            {setupMode
+              ? 'Fill this in once — every invoice you print will carry these details.'
+              : 'Set once — every new invoice starts from these defaults. Changes save automatically.'}
           </p>
         </div>
         <span className="text-[12px] text-mute inline-flex items-center gap-1.5">
@@ -64,10 +83,44 @@ export default function Settings() {
         </span>
       </div>
 
+      {setupMode ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 border border-brand/30 bg-brand/[0.045] px-4 py-3.5">
+          <div className="flex items-start gap-2.5 min-w-0">
+            <span className="grid place-items-center w-7 h-7 rounded-full bg-brand text-white shrink-0">
+              <Icon name="settings" className="w-4 h-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[13.5px] font-bold text-ink">Add your business details</p>
+              <p className="text-[12.5px] leading-relaxed text-mute">
+                Business name is required; address, GSTIN, bank details and rates are optional —
+                you can add them later from this same page.
+              </p>
+            </div>
+          </div>
+          <Btn variant="solid" icon="check" onClick={saveSetup}>
+            Save &amp; start invoicing
+          </Btn>
+        </div>
+      ) : null}
+
       <Section title="Business identity">
         <div className="grid sm:grid-cols-2 gap-3">
-          <Field label="Business name" className="sm:col-span-2">
-            <input className={inputCls(false)} value={business.name} onChange={(e) => set({ name: e.target.value })} placeholder="Silken Saga" />
+          <Field
+            label="Business name"
+            required
+            className="sm:col-span-2"
+            error={setupMode && nameErr ? 'Business name is required to start invoicing' : null}
+          >
+            <input
+              id="business-name"
+              className={inputCls(setupMode && nameErr)}
+              value={business.name}
+              onChange={(e) => {
+                if (nameErr) setNameErr(false)
+                set({ name: e.target.value })
+              }}
+              placeholder="Name as printed on your invoice"
+            />
           </Field>
           <Field label="Address" className="sm:col-span-2">
             <textarea

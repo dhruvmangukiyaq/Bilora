@@ -1,27 +1,26 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
-  STORAGE_KEY,
   blankInvoice,
-  defaultBusiness,
+  emptyBusiness,
+  emptyState,
   loadState,
   sampleState,
   saveState,
   uid,
 } from '../lib/storage'
+import { userKey } from '../lib/auth'
 import { todayDDMMYY } from '../lib/calc'
 
 const StoreCtx = createContext(null)
 
-export function StoreProvider({ children }) {
-  const [state, setState] = useState(() => loadState())
-  const first = useRef(true)
+/** Remount with `key={user}` so switching accounts reloads that user's data. */
+export function StoreProvider({ user, children }) {
+  const key = userKey(user)
+  const [state, setState] = useState(() => loadState(key))
 
   useEffect(() => {
-    if (first.current) {
-      first.current = false
-    }
-    saveState(state)
-  }, [state])
+    saveState(state, key)
+  }, [state, key])
 
   const patch = useCallback((fn) => setState((s) => ({ ...s, ...fn(s) })), [])
 
@@ -31,12 +30,15 @@ export function StoreProvider({ children }) {
       business: state.business,
       customers: state.customers,
       invoices: state.invoices,
+      onboarded: state.onboarded === true,
 
       /* ---- business settings ---- */
       updateBusiness: (p) =>
         setState((s) => ({ ...s, business: { ...s.business, ...p } })),
       resetBusiness: () =>
-        setState((s) => ({ ...s, business: defaultBusiness() })),
+        setState((s) => ({ ...s, business: emptyBusiness(), onboarded: false })),
+      /* the user pressed "Save & start invoicing" on the setup screen */
+      completeOnboarding: () => setState((s) => ({ ...s, onboarded: true })),
 
       /* ---- customers ---- */
       upsertCustomer: (c) =>
@@ -93,17 +95,12 @@ export function StoreProvider({ children }) {
         setState((s) => ({
           ...s,
           ...next,
-          business: { ...defaultBusiness(), ...(next.business || {}) },
+          onboarded:
+            next.onboarded === true || Boolean(String(next.business?.name ?? '').trim()),
+          business: { ...emptyBusiness(), ...(next.business || {}) },
         })),
       restoreSample: () => setState(() => sampleState()),
-      wipe: () =>
-        setState(() => ({
-          v: 1,
-          business: defaultBusiness(),
-          customers: [],
-          invoices: [],
-          nextNo: 1,
-        })),
+      wipe: () => setState(() => emptyState()),
     }
   }, [state])
 
@@ -115,5 +112,3 @@ export function useStore() {
   if (!ctx) throw new Error('useStore must be used inside <StoreProvider>')
   return ctx
 }
-
-export { STORAGE_KEY }

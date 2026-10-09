@@ -5,7 +5,8 @@ invoice, pixel for pixel. Fill a form on the left, watch the live A4 preview on 
 then download a **colour PDF** that matches the preview exactly.
 
 Built with **React 19 + Vite 6 + Tailwind CSS 4**, exporting via **html2canvas + jsPDF**.
-All data lives in `localStorage` — no backend, no login.
+All data lives in `localStorage` — no backend server. Access is gated by a simple
+**username + password sign-in**, and every account keeps its own data.
 
 ## Quick start
 
@@ -24,6 +25,22 @@ npm run preview    # serve the production build
 ```
 
 ## Features
+
+### Sign-in & first-run setup
+- **Sign in / Create account** screen (`src/pages/Auth.jsx`) — username (3–20 chars) +
+  password (min 4 chars, confirmed on sign-up). No server: accounts live in
+  `bilora.accounts.v1`, the password is salted and hashed (SHA-256 via
+  `crypto.subtle`, with a portable fallback for plain-`http` hosts) and the session
+  (`bilora.session.v1`) keeps you signed in until you press **Logout**.
+- **Every account has its own data** under `bilora.data.v1.<username>` — its own business
+  details, invoices and customers, so a shared browser never mixes users.
+- **Login → Business settings → invoice.** A new account is forced to the
+  *Set up your business* screen (nav locked, "New invoice" disabled); the invoice studio
+  unlocks only after **Save & start invoicing**, which requires a business name.
+  The gate is an explicit `onboarded` flag — typing the name does not jump away from the
+  form, so you can fill address, GSTIN, bank, rates and theme first.
+- **New accounts start empty** — no sample invoice. The Silken Saga demo is only loaded by
+  *Business settings → Restore sample*.
 
 ### Invoice studio
 - **Live A4 preview** that matches the PDF (scaled to fit, "1 page · preview matches the PDF").
@@ -79,11 +96,12 @@ npm run preview    # serve the production build
     with auto-derived tints), plus **Reset**
   - **Handwriting** toggle — renders values in a hand-written (Caveat) font, or **Clean**
   - **Export JSON / Import JSON** backup, **Restore sample**, **Erase all data**
-- Everything persists to `localStorage` under `bilora.gst.v1`.
+- Everything persists to `localStorage` under `bilora.data.v1.<username>` (accounts in
+  `bilora.accounts.v1`, session in `bilora.session.v1`).
 
 ## Sample data
 
-Seeded on first load (or via *Restore sample*):
+Loaded via *Business settings → Restore sample* (new accounts start empty):
 
 | Field | Value |
 |---|---|
@@ -106,10 +124,11 @@ src/
   lib/
     calc.js        formatting, Indian number-to-words, computeTotals, date masking
     validation.js  required-field + GSTIN checks
-    storage.js     localStorage API, seed data, JSON import/export, signature downscale
+    auth.js        accounts, password hashing, session, per-user data keys, setup gate
+    storage.js     per-user localStorage API, seed data, JSON import/export, signature downscale
     states.js      state name → GST code map
     pdf.js         html2canvas → jsPDF export (colour, A4, multipage)
-  store/StoreContext.jsx   app state + persistence
+  store/StoreContext.jsx   app state + per-user persistence
   components/
     invoice/InvoicePage.jsx   A4 document (absolute layout, theme vars)
     invoice/invoice.css       all invoice styling — absolute positioning only
@@ -117,11 +136,13 @@ src/
     ui.jsx                    buttons, fields, sections, toasts
     CustomerPicker.jsx        searchable saved-customer dropdown
   pages/
+    Auth.jsx        sign in / create account screen
     Studio.jsx      form rail + live preview + toolbar (Save / Print / WhatsApp / PDF)
     History.jsx     search, edit, duplicate, delete
     Customers.jsx   customer master CRUD
     Settings.jsx    business defaults, theme, signature, data tools
-  App.jsx           state-based routing (Studio / History / Customers / Settings)
+  App.jsx           auth gate → StoreProvider → state-based routing
+                    (Studio / History / Customers / Settings), setup gate
 ```
 
 ## Implementation notes
@@ -135,3 +156,13 @@ src/
 - Pass `windowWidth` / `windowHeight` but **not** `width` / `height` to html2canvas —
   explicit `width`/`height` override element bounds and break the A4 fill.
 - Works on mobile (stacked form/preview with a toggle) and desktop (side by side).
+
+## Auth & onboarding notes
+
+- `App.jsx` renders `AuthScreen` until a session exists, then mounts
+  `<StoreProvider key={user}>` — the key forces a reload of that user's data on switch.
+- The forced-setup gate reads `state.onboarded` (set only by *Save & start invoicing*),
+  never `business.name`, so filling the form does not yank the user into the studio and
+  the required-name validation stays reachable.
+- `wipe` / *Erase all data* resets `onboarded` to `false`, which sends the account back to
+  Business settings; *Restore sample* sets it to `true`.

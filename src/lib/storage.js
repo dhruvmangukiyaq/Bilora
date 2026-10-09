@@ -1,10 +1,32 @@
-/* localStorage persistence + first-run seed data (no backend). */
-
-export const STORAGE_KEY = 'bilora.gst.v1'
+/* localStorage persistence (no backend). Each user has their own data key
+   (see lib/auth.js), so nothing is shared between accounts. */
 
 export const uid = () =>
   `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
 
+/** Blank business — what a brand-new account starts with (no sample data). */
+export const emptyBusiness = () => ({
+  headerLeft: '॥ જય શ્રી સ્વામિનારાયણ ॥',
+  headerCenter: '॥ શ્રી ગણેશાય નમઃ ॥',
+  phone: '',
+  name: '',
+  address: '',
+  gstin: '',
+  pan: '',
+  state: '',
+  stateCode: '',
+  bankName: '',
+  acNo: '',
+  ifsc: '',
+  signature: '',
+  themeRed: '#D32F2F',
+  themePink: '#F4C7C3',
+  valueFont: 'clean', // 'clean' | 'hand'
+  sgstRate: 2.5,
+  cgstRate: 2.5,
+})
+
+/** The sample (Silken Saga) business — only ever loaded by "Restore sample". */
 export const defaultBusiness = () => ({
   headerLeft: '॥ જય શ્રી સ્વામિનારાયણ ॥',
   headerCenter: '॥ શ્રી ગણેશાય નમઃ ॥',
@@ -75,6 +97,7 @@ function seed() {
 
   return {
     v: 1,
+    onboarded: true, // sample business is already filled in
     business,
     customers: [purvir],
     invoices: [invoice],
@@ -85,28 +108,42 @@ function seed() {
 /** The first-run demo data (Silken Saga + invoice #7). */
 export const sampleState = () => seed()
 
-export function loadState() {
+/** Empty store for a brand-new account: no invoices, no customers, no sample. */
+export function emptyState() {
+  return {
+    v: 1,
+    onboarded: false, // forces Business Settings until "Save & start invoicing"
+    business: emptyBusiness(),
+    customers: [],
+    invoices: [],
+    nextNo: 1,
+  }
+}
+
+/** Load one user's data. `key` comes from auth.userKey(username). */
+export function loadState(key) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return seed()
+    const raw = localStorage.getItem(key)
+    if (!raw) return emptyState()
     const parsed = JSON.parse(raw)
-    if (!parsed || typeof parsed !== 'object' || !parsed.business) return seed()
+    if (!parsed || typeof parsed !== 'object' || !parsed.business) return emptyState()
     return {
-      ...seed(),
+      ...emptyState(),
       ...parsed,
-      business: { ...defaultBusiness(), ...parsed.business },
+      onboarded: parsed.onboarded === true,
+      business: { ...emptyBusiness(), ...parsed.business },
       customers: Array.isArray(parsed.customers) ? parsed.customers : [],
       invoices: Array.isArray(parsed.invoices) ? parsed.invoices : [],
       nextNo: Number(parsed.nextNo) || 1,
     }
   } catch {
-    return seed()
+    return emptyState()
   }
 }
 
-export function saveState(state) {
+export function saveState(state, key) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    localStorage.setItem(key, JSON.stringify(state))
     return true
   } catch {
     return false
