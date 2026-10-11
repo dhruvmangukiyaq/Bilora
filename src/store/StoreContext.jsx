@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import {
+  adoptLegacyState,
   blankInvoice,
   cutImageBackground,
   emptyBusiness,
@@ -17,7 +18,11 @@ const StoreCtx = createContext(null)
 /** Remount with `key={user}` so switching accounts reloads that user's data. */
 export function StoreProvider({ user, children }) {
   const key = userKey(user)
-  const [state, setState] = useState(() => loadState(key))
+  const [state, setState] = useState(() => {
+    /* state saved before accounts existed belongs to the first user in */
+    adoptLegacyState(user, key)
+    return loadState(key)
+  })
 
   useEffect(() => {
     saveState(state, key)

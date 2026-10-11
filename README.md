@@ -39,6 +39,15 @@ npm run preview    # serve the production build
   unlocks only after **Save & start invoicing**, which requires a business name.
   The gate is an explicit `onboarded` flag — typing the name does not jump away from the
   form, so you can fill address, GSTIN, bank, rates and theme first.
+- **Signing in again never repeats the setup.** Once an account has saved a business name,
+  it counts as onboarded whenever the data is loaded, so logging out and signing back in
+  (or a lost `onboarded` flag) opens the saved business, invoices and customers straight
+  away instead of the *Set up your business* screen.
+- **Data from before accounts existed is kept.** The old single-user state
+  (`bilora.gst.v1`) is handed to the **first account opened on that browser** once
+  (`bilora.legacy.owner` marks the owner, later accounts stay empty), so the business and
+  the invoices made before the sign-in screen existed are not lost. The old key is left
+  behind as a backup.
 - **New accounts start empty** — no sample invoice. The Silken Saga demo is only loaded by
   *Business settings → Restore sample*.
 
@@ -132,7 +141,7 @@ src/
     calc.js        formatting, Indian number-to-words, computeTotals, date masking
     validation.js  required-field + GSTIN checks
     auth.js        accounts, password hashing, session, per-user data keys, setup gate
-    storage.js     per-user localStorage API, seed data, JSON import/export, signature downscale + paper cut-out
+    storage.js     per-user localStorage API, seed data, legacy-data adoption, JSON import/export, signature downscale + paper cut-out
     states.js      state name → GST code map
     pdf.js         html2canvas → jsPDF export (colour, A5, multipage)
   store/StoreContext.jsx   app state + per-user persistence
@@ -171,8 +180,12 @@ src/
 
 - `App.jsx` renders `AuthScreen` until a session exists, then mounts
   `<StoreProvider key={user}>` — the key forces a reload of that user's data on switch.
-- The forced-setup gate reads `state.onboarded` (set only by *Save & start invoicing*),
-  never `business.name`, so filling the form does not yank the user into the studio and
-  the required-name validation stays reachable.
-- `wipe` / *Erase all data* resets `onboarded` to `false`, which sends the account back to
-  Business settings; *Restore sample* sets it to `true`.
+- The forced-setup gate reads `state.onboarded` while the app runs (set only by
+  *Save & start invoicing*), never `business.name`, so filling the form does not yank the
+  user into the studio and the required-name validation stays reachable. When saved state
+  is **loaded**, a saved business name is treated as onboarded as well — an account that
+  has set up once never sees the setup screen again after signing back in.
+- `wipe` / *Erase all data* resets `onboarded` to `false` and clears the business name,
+  which sends the account back to Business settings; *Restore sample* sets it to `true`.
+- `adoptLegacyState(user, key)` (`lib/storage.js`) copies the pre-login `bilora.gst.v1`
+  state into a user's key the first time that browser opens an account with no data.

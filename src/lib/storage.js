@@ -128,17 +128,46 @@ export function loadState(key) {
     if (!raw) return emptyState()
     const parsed = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object' || !parsed.business) return emptyState()
+    const business = { ...emptyBusiness(), ...parsed.business }
     return {
       ...emptyState(),
       ...parsed,
-      onboarded: parsed.onboarded === true,
-      business: { ...emptyBusiness(), ...parsed.business },
+      /* any account that has ever saved a business name has been through the
+         setup screen once — signing in again must never show it a second time */
+      onboarded: parsed.onboarded === true || Boolean(String(business.name ?? '').trim()),
+      business,
       customers: Array.isArray(parsed.customers) ? parsed.customers : [],
       invoices: Array.isArray(parsed.invoices) ? parsed.invoices : [],
       nextNo: Number(parsed.nextNo) || 1,
     }
   } catch {
     return emptyState()
+  }
+}
+
+/* ---------------- data written before accounts existed ----------------
+
+   The app used to keep one shared state under a single key. Accounts moved
+   it to a per-user key, so that old business and those old invoices would
+   otherwise vanish the moment a user signs up. The first account opened on
+   this browser inherits that state once — later accounts stay empty. */
+
+const LEGACY_KEY = 'bilora.gst.v1'
+const LEGACY_OWNER = 'bilora.legacy.owner'
+
+/** Copy the pre-login state into a user's own key. Returns true when copied. */
+export function adoptLegacyState(user, key) {
+  try {
+    if (localStorage.getItem(key)) return false // this account already has data
+    const legacy = localStorage.getItem(LEGACY_KEY)
+    if (!legacy) return false
+    const owner = localStorage.getItem(LEGACY_OWNER)
+    if (owner && owner !== user) return false // already handed to another account
+    localStorage.setItem(key, legacy)
+    localStorage.setItem(LEGACY_OWNER, user)
+    return true
+  } catch {
+    return false
   }
 }
 
