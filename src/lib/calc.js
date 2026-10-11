@@ -150,6 +150,23 @@ export const todayDDMMYY = () => {
 
 export const isValidDDMMYY = (s) => /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{2}$/.test(String(s ?? '').trim())
 
+/**
+ * "01/09/25" -> Date(2025, 8, 1). Returns null for anything unreadable, and
+ * accepts a 4-digit year too. 2-digit years are read as 20YY (the app only
+ * ever writes current-century dates).
+ */
+export function parseDDMMYY(s) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(s ?? '').trim())
+  if (!m) return null
+  const day = Number(m[1])
+  const month = Number(m[2])
+  const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3])
+  const d = new Date(year, month - 1, day)
+  // rejects 31/02/25 etc. — the Date would silently roll into the next month
+  if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null
+  return d
+}
+
 /** keep typing shaped as DD/MM/YY */
 export const maskDate = (v) => {
   const d = String(v ?? '').replace(/\D/g, '').slice(0, 6)

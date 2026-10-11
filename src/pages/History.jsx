@@ -1,7 +1,29 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../store/StoreContext.jsx'
 import { Btn, EmptyState, Icon, Toast } from '../components/ui.jsx'
-import { computeTotals, fmtAmt } from '../lib/calc.js'
+import { computeTotals, fmtAmt, parseDDMMYY, round2 } from '../lib/calc.js'
+
+/** exactly `n` calendar months before `from`, clamped to the last real day
+    (31 Mar − 6 months = 30 Sep, not 1 Oct). */
+const monthsBack = (from, n) => {
+  const d = new Date(from.getTime())
+  const day = d.getDate()
+  d.setMonth(d.getMonth() - n)
+  if (d.getDate() < day) d.setDate(0)
+  return d
+}
+
+/** The date an invoice is counted against: its printed date first, the moment
+    it was saved as a fallback, or null when neither can be read. */
+const invoiceTime = (inv) => {
+  const printed = parseDDMMYY(inv.date)
+  if (printed) return printed.getTime()
+  const saved = Number(inv.savedAt)
+  return Number.isFinite(saved) && saved > 0 ? saved : null
+}
+
+const shortDate = (d) =>
+  d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })
 
 export default function History({ onEdit, onNew }) {
   const store = useStore()
@@ -29,6 +51,41 @@ export default function History({ onEdit, onNew }) {
         .includes(term)
     )
   }, [invoices, q])
+
+  /* Totals shown under the list: everything, plus rolling 6-month and
+     1-year windows counted back from today. Follows the current search. */
+  const summary = useMemo(() => {
+    const now = new Date()
+    const since6 = monthsBack(now, 6)
+    const since12 = monthsBack(now, 12)
+
+    const out = {
+      now,
+      since6,
+      since12,
+      all: { amount: 0, count: rows.length },
+      m6: { amount: 0, count: 0 },
+      y1: { amount: 0, count: 0 },
+    }
+
+    for (const { inv, total } of rows) {
+      out.all.amount += total
+      const at = invoiceTime(inv)
+      if (at === null) continue
+      if (at >= since6.getTime()) {
+        out.m6.amount += total
+        out.m6.count += 1
+      }
+      if (at >= since12.getTime()) {
+        out.y1.amount += total
+        out.y1.count += 1
+      }
+    }
+    out.all.amount = round2(out.all.amount)
+    out.m6.amount = round2(out.m6.amount)
+    out.y1.amount = round2(out.y1.amount)
+    return out
+  }, [rows])
 
   const remove = (inv) => {
     if (window.confirm(`Delete invoice #${inv.no} for M/s. ${inv.buyer.name || '—'}?`)) {
@@ -129,10 +186,82 @@ export default function History({ onEdit, onNew }) {
               </div>
             </div>
           ))}
+
+          {/* ------- grand totals: all bills, last 6 months, last 1 year ------- */}
+          <div className="border-t-2 border-ink/10 bg-[#FCFCFC] px-4 py-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-mute">
+                Bill totals
+                {q.trim() ? (
+                  <span className="text-ink"> · {rows.length} of {invoices.length} shown</span>
+                ) : null}
+              </p>
+              <p className="text-[11.5px] text-mute">
+                6-month / 1-year windows count back from {shortDate(summary.now)} · amounts include GST
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              <Stat
+                label="Last 6 months"
+                hint={`${shortDate(summary.since6)} – ${shortDate(summary.now)}`}
+                amount={summary.m6.amount}
+                count={summary.m6.count}
+              />
+              <Stat
+                label="Last 1 year"
+                hint={`${shortDate(summary.since12)} – ${shortDate(summary.now)}`}
+                amount={summary.y1.amount}
+                count={summary.y1.count}
+              />
+              <Stat
+                label="Grand total"
+                hint="Every bill in this list"
+                amount={summary.all.amount}
+                count={summary.all.count}
+                accent
+              />
+            </div>
+          </div>
         </div>
       )}
 
       {toast ? <Toast>{toast.msg}</Toast> : null}
+    </div>
+  )
+}
+
+function Stat({ label, hint, amount, count, accent }) {
+  return (
+    <div
+      className={`rounded-[5px] border px-3.5 py-3 ${
+        accent ? 'bg-brand border-brand' : 'bg-white border-line'
+      }`}
+    >
+      <div className="flex items-baseline justify-between gap-2">
+        <span
+          className={`text-[11px] font-bold uppercase tracking-[0.07em] ${
+            accent ? 'text-white/85' : 'text-mute'
+          }`}
+        >
+          {label}
+        </span>
+        <span
+          className={`text-[11px] tnum ${accent ? 'text-white/80' : 'text-mute'}`}
+        >
+          {count} bill{count === 1 ? '' : 's'}
+        </span>
+      </div>
+      <p
+        className={`mt-1.5 text-[20px] font-extrabold leading-none tnum ${
+          accent ? 'text-white' : 'text-ink'
+        }`}
+      >
+        Rs. {fmtAmt(amount)}
+      </p>
+      <p className={`mt-1.5 text-[11px] tnum ${accent ? 'text-white/75' : 'text-mute'}`}>
+        {hint}
+      </p>
     </div>
   )
 }
